@@ -1,3 +1,5 @@
 dump.rdb
 
 gin-bin
+
+*.sublime-workspace

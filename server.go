@@ -52,9 +52,7 @@ func SetUpRoutes(r *gin.Engine) {
 	r.GET("/ping/:user", pingUserGET)
 
 	// WebSockets
-	r.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request)
-	})
+	r.GET("/ws", wshandler)
 }
 
 func Uniquify() gin.HandlerFunc {

@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
@@ -27,10 +27,26 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var clients map[string]*websocket.Conn
+type connection struct {
+	ws *websocket.Conn
+	// queue chan []byte
+}
 
-func wshandler(w http.ResponseWriter, r *http.Request) {
-	clients = make(map[string]*websocket.Conn)
+type hub struct {
+	rooms map[string]*connection
+}
+
+var h = hub{
+	rooms: make(map[string]*connection),
+}
+
+func wshandler(c *gin.Context) {
+	w := c.Writer
+	r := c.Request
+
+	userKey := c.MustGet("key").(string)
+
+	log.Printf("User key: %s", userKey)
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -38,7 +54,9 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clients["roman"] = conn
+	conLink := &connection{ws: conn}
+
+	h.rooms[userKey] = conLink
 
 	for {
 		t, msg, err := conn.ReadMessage()
