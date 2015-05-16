@@ -60,7 +60,7 @@ func pingUserGET(c *gin.Context) {
 
 	page := PingUserPage{room, false}
 	if roomUser != userKey {
-		notifyHost(room)
+		notifyHost(room, "notify:empty")
 	} else {
 		page.IsHost = true
 	}

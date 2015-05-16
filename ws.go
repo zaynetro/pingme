@@ -85,7 +85,7 @@ func wshandler(c *gin.Context) {
 	}
 }
 
-func notifyHost(host string) {
+func notifyHost(host string, msg string) {
 	log.Printf("Notify host\n")
 
 	conn, ok := h.rooms[host]
@@ -94,5 +94,5 @@ func notifyHost(host string) {
 		return
 	}
 
-	conn.ws.WriteMessage(websocket.TextMessage, []byte("notify:empty"))
+	conn.ws.WriteMessage(websocket.TextMessage, []byte(msg))
 }
