@@ -23,7 +23,12 @@ func indexPOST(c *gin.Context) {
 
 	key := c.MustGet("key").(string)
 
-	// TODO: check for existance
+	// Check for room existance
+	if exists("room:" + user.Name) {
+		log.Printf("Room exists")
+		c.Redirect(http.StatusMovedPermanently, "/?err=taken")
+		return
+	}
 	// Init new room
 	//   - Save room name (user name) with user key (uuid)
 	exec("SET", "room:"+user.Name, key)

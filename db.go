@@ -32,3 +32,10 @@ func exec(command string, args ...interface{}) {
 	defer conn.Close()
 	conn.Do(command, args...)
 }
+
+func exists(key string) bool {
+	conn := dialLocal()
+	defer conn.Close()
+	val, _ := redis.Bool(conn.Do("EXISTS", key))
+	return val
+}
