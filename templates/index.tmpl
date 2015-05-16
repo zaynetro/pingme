@@ -1,15 +1,34 @@
-<!doctype>
+<!doctype html>
 <html>
 <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta charset="utf-8" />
 	<title>Ping me</title>
+	<link rel="stylesheet" type="text/css" href="/static/style/template.css" />
 </head>
 <body>
-	<h1>PingME</h1>
-	<h2>Specify your name:</h2>
-	<form method="POST" enctype="multipart/form-data">
-		<input type="text" name="username" placeholder="Your name" />
-		<input type="submit" value="GO">
-	</form>
+	<div class="wrapper">
+		<nav>
+			<a href="#about">About</a>
+		</nav>
+		<main role="main">
+			<h1>PingME</h1>
+			<h2>Create room:</h2>
+			<form action="" method="POST" enctype="multipart/form-data">
+				<input type="text" class="text" name="username" placeholder="Your name" />
+				<input type="submit" class="button" value="GO">
+			</form>
+
+			<section id="about" class="about">
+				<h2>About</h2>
+				<p>
+					Some description
+				</p>
+			</section>
+		</main>
+		<footer>
+			Made by <a href="//zaynetro.github.io">zaynetro</a> 2015
+		</footer>
+	</div>
 </body>
 </html>

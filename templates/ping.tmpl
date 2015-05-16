@@ -1,44 +1,65 @@
-<!doctype>
+<!doctype html>
 <html>
 <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta charset="utf-8" />
 	<title>Ping me</title>
+    <link rel="stylesheet" type="text/css" href="/static/style/template.css" />
 </head>
 <body>
-	<h1>PingME</h1>
-	<h2>Your message:</h2>
-	<input type="text" id="msg" />
-	<input type="button" id="sendBtn" value="Send" />
-	<div id="log"></div>
-	<script>
-	var url = 'ws://localhost:3000/ws';
-    var c = new WebSocket(url);
+    <div class="wrapper">
+        <nav>
+            <a href="/">Create</a>
+            <a href="/#about">About</a>
+        </nav>
+        <main role="main">
+            <h1>Ping {{.Room}}</h1>
 
-    var btn = document.querySelector('#sendBtn');
-    var msg = document.querySelector('#msg');
-    var log = document.querySelector('#log');
+            {{if .IsHost}}
+            <h2>Log:</h2>
+            <textarea id="log" readonly></textarea>
+            {{else}}
+            <h2>{{.Room}} is notified!</h2>
+            {{end}}
+        </main>
+        <footer>
+            Made by <a href="//zaynetro.github.io">zaynetro</a> 2015
+        </footer>
+    </div>
 
-    btn.addEventListener('click', function () {
-    	var text = msg.value;
-    	c.send(text);
+    {{if .IsHost}}
+    <script>
+    ;(function (window, document, undefined) {
+        var host = window.location.host;
+        var protocol = (
+            window.location.protocol === 'https' 
+                ? 'wss'
+                : 'ws'
+        );
 
-    	msg.value = '';
-    });
+        var url = protocol + '://' + host + '/ws';
+        var c = new window.WebSocket(url);
 
-    c.onmessage = function (data) {
-    	log.innerHTML += data.data + '<br />';
-    	console.log(data);
-    };
+        var logEl = document.querySelector('#log');
 
-    c.onopen = function () {
-    	log.innerHTML += 'Connection opened<br/>';
-    	console.log('Connection opened');
-    };
+        c.onmessage = function (data) {
+            log(data.data);
+        };
 
-    c.onclose = function () {
-    	log.innerHTML += 'Connection closed<br />';
-    	console.log('Connection closed');
-    };
-	</script>
+        c.onopen = function () {
+            log('Connection opened');
+        };
+
+        c.onclose = function () {
+            log('Connection closed');
+        };
+
+        function log(text) {
+            logEl.value = (new Date()).toLocaleString() + ': "' + text + '"\n' + logEl.value;
+            console.log(text);
+        }
+    })(window, document, undefined);
+    </script>
+    {{end}}
 </body>
 </html>

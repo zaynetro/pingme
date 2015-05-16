@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -11,6 +12,11 @@ import (
 type User struct {
 	Name  string `form:"username" binding:"required"`
 	Email string `form:"email"`
+}
+
+type PingUserPage struct {
+	Room   string
+	IsHost bool
 }
 
 func indexGET(c *gin.Context) {
@@ -23,18 +29,20 @@ func indexPOST(c *gin.Context) {
 
 	key := c.MustGet("key").(string)
 
+	name := url.QueryEscape(user.Name)
+
 	// Check for room existance
-	if exists("room:" + user.Name) {
+	if exists("room:" + name) {
 		log.Printf("Room exists")
 		c.Redirect(http.StatusMovedPermanently, "/?err=taken")
 		return
 	}
 	// Init new room
 	//   - Save room name (user name) with user key (uuid)
-	exec("SET", "room:"+user.Name, key)
-	exec("SET", "user:"+key, user.Name)
+	exec("SET", "room:"+name, key)
+	exec("SET", "user:"+key, name)
 
-	c.Redirect(http.StatusMovedPermanently, "/ping/"+user.Name)
+	c.Redirect(http.StatusMovedPermanently, "/ping/"+name)
 }
 
 func pingUserGET(c *gin.Context) {
@@ -49,9 +57,15 @@ func pingUserGET(c *gin.Context) {
 	}
 
 	log.Printf("Room %s, host %s, user %s\n", room, roomUser, userKey)
-	if roomUser != "user:"+userKey {
+
+	page := PingUserPage{room, false}
+	if roomUser != userKey {
 		notifyHost(room)
+	} else {
+		page.IsHost = true
 	}
 
-	c.HTML(http.StatusOK, "ping.tmpl", nil)
+	log.Printf("%+v", page)
+
+	c.HTML(http.StatusOK, "ping.tmpl", page)
 }
