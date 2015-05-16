@@ -21,12 +21,30 @@ func indexPOST(c *gin.Context) {
 	var user User
 	c.BindWith(&user, binding.MultipartForm)
 
-	log.Printf("user name %s\n", user.Name)
+	key := c.MustGet("key").(string)
+
+	// TODO: check for existance
+	// Init new room
+	//   - Save room name (user name) with user key (uuid)
+	exec("SET", "room:"+user.Name, key)
+	exec("SET", "user:"+key, user.Name)
 
 	c.Redirect(http.StatusMovedPermanently, "/ping/"+user.Name)
 }
 
 func pingUserGET(c *gin.Context) {
+	userKey := c.MustGet("key").(string)
+	room := c.Params.ByName("user")
+
+	roomUser, err := getString("GET", "room:"+room)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("Room %s, host %s, user %s\n", room, roomUser, userKey)
+	if roomUser != "user:"+userKey {
+		notifyHost(room)
+	}
+
 	c.HTML(http.StatusOK, "ping.tmpl", nil)
-	// c.String(http.StatusOK, "pinged "+c.Params.ByName("user"))
 }

@@ -44,10 +44,6 @@ func wshandler(c *gin.Context) {
 	w := c.Writer
 	r := c.Request
 
-	userKey := c.MustGet("key").(string)
-
-	log.Printf("User key: %s", userKey)
-
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Failed to set websocket upgrade: %+v\n", err)
@@ -56,7 +52,16 @@ func wshandler(c *gin.Context) {
 
 	conLink := &connection{ws: conn}
 
-	h.rooms[userKey] = conLink
+	userKey := c.MustGet("key").(string)
+
+	// If user has a room save his connection
+	userRoom, err := getString("GET", "user:"+userKey)
+	if err == nil {
+		log.Printf("User key: %s\n", userKey)
+		log.Printf("User room: %s\n", userRoom)
+		// Save connection only when user has a room
+		h.rooms[userRoom] = conLink
+	}
 
 	for {
 		t, msg, err := conn.ReadMessage()
@@ -67,4 +72,16 @@ func wshandler(c *gin.Context) {
 
 		conn.WriteMessage(t, msg)
 	}
+}
+
+func notifyHost(host string) {
+	log.Printf("Notify host\n")
+
+	conn, ok := h.rooms[host]
+	if ok == false {
+		log.Printf("No connection for host\n")
+		return
+	}
+
+	conn.ws.WriteMessage(websocket.TextMessage, []byte("Someone needs you"))
 }
