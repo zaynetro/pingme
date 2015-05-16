@@ -77,3 +77,9 @@ main textarea {
 	font-family: monospace;
 	border: 0;
 }
+
+.about p {
+	line-height: 1.5;
+	padding: 0 2rem;
+	text-align: left;
+}
