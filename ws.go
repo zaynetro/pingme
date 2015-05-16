@@ -94,5 +94,5 @@ func notifyHost(host string) {
 		return
 	}
 
-	conn.ws.WriteMessage(websocket.TextMessage, []byte("Someone needs you"))
+	conn.ws.WriteMessage(websocket.TextMessage, []byte("notify:empty"))
 }

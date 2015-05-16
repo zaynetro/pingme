@@ -44,6 +44,7 @@
 
         c.onmessage = function (data) {
             log(data.data);
+            action(processMsg(data.data));
         };
 
         c.onopen = function () {
@@ -58,6 +59,56 @@
             logEl.value = (new Date()).toLocaleString() + ': "' + text + '"\n' + logEl.value;
             console.log(text);
         }
+
+        var fields = ['name', 'content']
+        function processMsg(msg) {
+            var obj = {};
+            var arr = msg.split(':');
+            arr.forEach(function (el, index) {
+                if(index >= fields.length) return;
+
+                obj[fields[index]] = el;
+            });
+            return obj;
+        }
+
+        function action(e) {
+            switch(e.name) {
+                case 'notify':
+                    notify('Someone needs you');
+                    break;
+            }
+        }
+
+        function notify(msg) {
+            if(!('Notification' in window)) {
+                console.log('Browser doesn\'t support Notification');
+                return;
+            }
+
+            if(!isNotifAllowed) return;
+
+            var notification = new window.Notification('Are you there?', {
+                icon: 'https://cdn0.iconfinder.com/data/icons/christmas-free-icon-pack/128/bell-128.png',
+                body: msg
+            });
+        }
+
+        var isNotifAllowed = false;
+        function confNotifications() {
+            if(window.Notification.permission === 'granted') {
+                isNotifAllowed = true;
+                return;
+            }
+
+            if(window.Notification.permission !== 'denied') {
+                window.Notification.requestPermission(function (permission) {
+                    isNotifAllowed = permission === 'granted';
+                });
+            }
+        }
+
+        confNotifications();
     })(window, document, undefined);
     </script>
     {{end}}
