@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 	"runtime"
@@ -11,14 +10,10 @@ import (
 	"github.com/twinj/uuid"
 )
 
-var addr = flag.String("addr", ":3000", "server address")
-
 // Session expiration (from github.com/boj/redistore)
 var sessionExpire = 86400 * 30
 
 func main() {
-	flag.Parse()
-
 	nuCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(nuCPU)
 
@@ -46,7 +41,12 @@ func SetUpServer() {
 		c.JSON(200, gin.H{"count": c.MustGet("key").(string)})
 	})
 
-	r.Run(*addr)
+	// var port string
+	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "3000"
+	}
+	r.Run(":" + port)
 }
 
 func SetUpRoutes(r *gin.Engine) {
