@@ -63,6 +63,17 @@ func wshandler(c *gin.Context) {
 		h.rooms[userRoom] = conLink
 	}
 
+	defer func() {
+		log.Printf("Socket connection closed\n")
+		// Remove room and connection if host left
+		if len(userRoom) > 0 {
+			delete(h.rooms, userRoom)
+			exec("DEL", "user:"+userKey, "room:"+userRoom)
+			log.Printf("Room removed")
+		}
+		conn.Close()
+	}()
+
 	for {
 		t, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -78,7 +89,7 @@ func notifyHost(host string) {
 	log.Printf("Notify host\n")
 
 	conn, ok := h.rooms[host]
-	if ok == false {
+	if !ok {
 		log.Printf("No connection for host\n")
 		return
 	}

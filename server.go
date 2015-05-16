@@ -13,6 +13,9 @@ import (
 
 var addr = flag.String("addr", ":3000", "server address")
 
+// Session expiration (from github.com/boj/redistore)
+var sessionExpire = 86400 * 30
+
 func main() {
 	flag.Parse()
 
@@ -55,6 +58,7 @@ func SetUpRoutes(r *gin.Engine) {
 	r.GET("/ws", wshandler)
 }
 
+// Create uuid key for each user session
 func Uniquify() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)

@@ -38,7 +38,9 @@ func pingUserGET(c *gin.Context) {
 
 	roomUser, err := getString("GET", "room:"+room)
 	if err != nil {
-		panic(err)
+		// If room doesn't exist, go to index
+		c.Redirect(http.StatusMovedPermanently, "/")
+		return
 	}
 
 	log.Printf("Room %s, host %s, user %s\n", room, roomUser, userKey)
