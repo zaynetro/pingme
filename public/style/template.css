@@ -6,6 +6,10 @@ body {
 	background: #fff
 }
 
+.error {
+	color: #c00;
+}
+
 .wrapper {
 	max-width: 30rem;
 	margin: 2rem auto;

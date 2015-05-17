@@ -45,6 +45,14 @@ func wshandler(context *gin.Context) {
 	var room *Room
 	user := User{context.MustGet("key").(string)}
 
+	userRoom, err := getString("GET", "user:"+user.key)
+	// If user has a room save his connection
+	if err == nil {
+		room = &Room{userRoom, user}
+		log.Printf("User key: %s\n", user.key)
+		log.Printf("User room: %v\n", room)
+	}
+
 	c := &connection{
 		ws: conn,
 		// send: make(chan []byte),
@@ -52,12 +60,7 @@ func wshandler(context *gin.Context) {
 		room: room,
 	}
 
-	userRoom, err := getString("GET", "user:"+user.key)
-	// If user has a room save his connection
 	if err == nil {
-		room := Room{userRoom, user}
-		log.Printf("User key: %s\n", user.key)
-		log.Printf("User room: %v\n", room)
 		// Save connection only when user has a room
 		h.rooms[room.name] = c
 	}
@@ -68,8 +71,9 @@ func wshandler(context *gin.Context) {
 func (c *connection) manage() {
 	// ticker := time.NewTicker(pingPeriod)
 
+	log.Printf("INIT CONNECTION with USER=%v and ROOM=%v\n", c.user, c.room)
+
 	defer func() {
-		log.Printf("Socket connection closed\n")
 		// Remove room and connection when host left
 		if c.room != nil {
 			delete(h.rooms, c.room.name)
@@ -78,6 +82,7 @@ func (c *connection) manage() {
 		}
 		// ticker.Stop()
 		c.ws.Close()
+		log.Printf("CLOSE CONNECTION\n")
 	}()
 
 	for {
@@ -91,7 +96,6 @@ func (c *connection) manage() {
 		if err != nil {
 			break
 		}
-		log.Printf("Socket message type: %d", t)
 
 		c.ws.WriteMessage(t, msg)
 		// }

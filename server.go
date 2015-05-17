@@ -10,39 +10,21 @@ import (
 	"github.com/twinj/uuid"
 )
 
-// Session expiration (from github.com/boj/redistore)
-var sessionExpire = 86400 * 30
-
-var REDIS_URL string
-var PORT string
-
 func main() {
 	nuCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(nuCPU)
 
 	log.SetOutput(os.Stdout)
 	log.Printf("Running with %d CPUs\n", nuCPU)
-
-	SetUpEnv()
+	log.Printf("CONFIG=%v\n", CONFIG)
+	// Configure web server
 	SetUpServer()
-}
-
-func SetUpEnv() {
-	REDIS_URL = os.Getenv("REDIS_URL")
-	if len(REDIS_URL) == 0 {
-		REDIS_URL = "localhost:6379"
-	}
-
-	PORT = os.Getenv("PORT")
-	if len(PORT) == 0 {
-		PORT = "3000"
-	}
 }
 
 func SetUpServer() {
 	r := gin.Default()
 
-	store, _ := sessions.NewRedisStore(10, "tcp", REDIS_URL, "", []byte("secret"))
+	store, _ := sessions.NewRedisStore(10, "tcp", CONFIG.Redis.Host, CONFIG.Redis.Password, []byte(CONFIG.Server.Secret))
 	r.Use(sessions.Sessions("session", store))
 
 	r.Use(gin.Recovery())
@@ -59,7 +41,7 @@ func SetUpServer() {
 
 	// var port string
 
-	r.Run(":" + PORT)
+	r.Run(":" + CONFIG.Server.Port)
 }
 
 func SetUpRoutes(r *gin.Engine) {

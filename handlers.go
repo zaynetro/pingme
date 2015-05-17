@@ -23,13 +23,24 @@ type UserForm struct {
 	Email string `form:"email"`
 }
 
+type IndexPage struct {
+	Error string
+}
+
 type PingUserPage struct {
 	Room   string
 	IsHost bool
 }
 
 func indexGET(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.tmpl", nil)
+	c.Request.ParseForm()
+
+	page := IndexPage{}
+	errKey := c.Request.Form.Get("err")
+
+	page.Error = errKey
+
+	c.HTML(http.StatusOK, "index.tmpl", page)
 }
 
 func indexPOST(c *gin.Context) {
@@ -46,10 +57,12 @@ func indexPOST(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/?err=taken")
 		return
 	}
-	// Init new room
-	//   - Save room name (user name) with user key (uuid)
+	// Map new room name (user name) to user key (uuid)
 	exec("SET", "room:"+name, key)
+	exec("EXPIRE", "room:"+name, sessionExpire)
+	// Map user to his room
 	exec("SET", "user:"+key, name)
+	exec("EXPIRE", "user:"+key, sessionExpire)
 
 	c.Redirect(http.StatusMovedPermanently, "/ping/"+name)
 }

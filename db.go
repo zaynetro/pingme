@@ -4,17 +4,24 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-func dial(network string, address string) (redis.Conn, error) {
+func dial(network string, address string, password string) (redis.Conn, error) {
 	c, err := redis.Dial(network, address)
 	if err != nil {
 		return nil, err
 	}
-	// defer c.Close()
+
+	if password != "" {
+		if _, err := c.Do("AUTH", password); err != nil {
+			c.Close()
+			return nil, err
+		}
+	}
+
 	return c, err
 }
 
 func dialLocal() redis.Conn {
-	c, err := dial("tcp", REDIS_URL)
+	c, err := dial("tcp", CONFIG.Redis.Host, CONFIG.Redis.Password)
 	if err != nil {
 		panic(err)
 	}

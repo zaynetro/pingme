@@ -3,8 +3,8 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0">
-	<meta charset="utf-8" />
-	<title>Ping {{.Room}}</title>
+    <meta charset="utf-8" />
+    <title>Ping {{.Room}}</title>
     <link rel="stylesheet" type="text/css" href="/static/style/template.css" />
 </head>
 <body>
@@ -33,7 +33,7 @@
     ;(function (window, document, undefined) {
         var host = window.location.host;
         var protocol = (
-            window.location.protocol === 'https' 
+            window.location.protocol === 'https:' 
                 ? 'wss'
                 : 'ws'
         );
@@ -54,6 +54,7 @@
 
         c.onclose = function () {
             log('Connection closed');
+            clearInterval(pingInterval);
         };
 
         function log(text) {
@@ -108,6 +109,10 @@
                 });
             }
         }
+
+        var pingInterval = setInterval(function () {
+            c.send("ping:fromclient");
+        }, 20000);
 
         confNotifications();
     })(window, document, undefined);

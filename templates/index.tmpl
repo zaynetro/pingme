@@ -19,14 +19,17 @@
 				<input type="text" class="text" name="username" placeholder="Your name" />
 				<input type="submit" class="button" value="GO">
 			</form>
+			{{if eq .Error "taken" }}<div class="error">Room is taken</div>{{end}}
 
 			<section id="about" class="about">
 				<h2>About</h2>
 				<p>Get notifications easily when someone needs you.</p>
 				<p>Create your personal room, share your room link and receive notifications, when people are trying to reach you (open link). Remember to leave your tab open (<i>Could be changed soon with <a href="https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorker" target="_blank">Service Workers</a></i>) and allow notifications.</p>
 
+				<p class="note">Connection is held within a single tab. Everytime you close it, your room is removed. Max room living time is around 30 days (session expiration time).</p>
+
 				<h2>Additional info</h2>
-				<p>More information could be found on <a href="//github.com/zaynetro/pingme">GitHub</a></p>
+				<p>More information could be found on <a href="//github.com/zaynetro/pingme">GitHub</a>.</p>
 			</section>
 		</main>
 		<footer>
