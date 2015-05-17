@@ -13,6 +13,7 @@ Connection is held within a single tab. Everytime you close it, your room is rem
 * <s>Add referer to url, so you can see where users came from</s>
 * Play with Service Workers
 * Clean up (when app is closed remove old entries from the database)
+* Don't trigger bots as people visiting link
 
 **NOTE:** Plans might change depending on free time and interest.
 
