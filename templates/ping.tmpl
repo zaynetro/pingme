@@ -24,7 +24,7 @@
             <section class="link">
                 <h2>Share:</h2>
                 <input type="text" class="text" id="referer" placeholder="Referer" />
-                <input type="text" onclick="this.select();" class="text" id="shareLink" readonly />
+                <input type="text" onclick="this.select();" class="text" id="refererLink" readonly />
             </section>
             {{else}}
             <h2>{{.Room}} is notified!</h2>
@@ -127,7 +127,7 @@
         }, 20000);
 
         var refererEl = document.querySelector('#referer');
-        var shareLinkEl = document.querySelector('#shareLink');
+        var shareLinkEl = document.querySelector('#refererLink');
 
         refererEl.addEventListener('keyup', formShareLink, false);
 
