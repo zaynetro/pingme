@@ -11,6 +11,7 @@ Create your personal room, share your room link and receive notifications, when 
 * Implement queue, so you receive only a summary of all requests (no need to send dozens of notifications)
 * Review backend
 * Add referer to url, so you can see where users came from
+* Play with Service Workers
 
 **NOTE:** Plans might change depending on free time and interest.
 

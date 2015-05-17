@@ -10,6 +10,15 @@ import (
 )
 
 type User struct {
+	key string
+}
+
+type Room struct {
+	name string
+	host User
+}
+
+type UserForm struct {
 	Name  string `form:"username" binding:"required"`
 	Email string `form:"email"`
 }
@@ -24,7 +33,7 @@ func indexGET(c *gin.Context) {
 }
 
 func indexPOST(c *gin.Context) {
-	var user User
+	var user UserForm
 	c.BindWith(&user, binding.MultipartForm)
 
 	key := c.MustGet("key").(string)
@@ -51,6 +60,7 @@ func pingUserGET(c *gin.Context) {
 
 	roomUser, err := getString("GET", "room:"+room)
 	if err != nil {
+		log.Printf("Room %s doesn't exist\n", room)
 		// If room doesn't exist, go to index
 		c.Redirect(http.StatusMovedPermanently, "/")
 		return

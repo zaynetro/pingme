@@ -9,17 +9,7 @@ import (
 )
 
 const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	pingPeriod = 60 * time.Second
 )
 
 var upgrader = websocket.Upgrader{
@@ -29,7 +19,9 @@ var upgrader = websocket.Upgrader{
 
 type connection struct {
 	ws *websocket.Conn
-	// queue chan []byte
+	// send chan []byte
+	user *User
+	room *Room
 }
 
 type hub struct {
@@ -40,9 +32,9 @@ var h = hub{
 	rooms: make(map[string]*connection),
 }
 
-func wshandler(c *gin.Context) {
-	w := c.Writer
-	r := c.Request
+func wshandler(context *gin.Context) {
+	w := context.Writer
+	r := context.Request
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -50,49 +42,71 @@ func wshandler(c *gin.Context) {
 		return
 	}
 
-	conLink := &connection{ws: conn}
+	var room *Room
+	user := User{context.MustGet("key").(string)}
 
-	userKey := c.MustGet("key").(string)
-
-	// If user has a room save his connection
-	userRoom, err := getString("GET", "user:"+userKey)
-	if err == nil {
-		log.Printf("User key: %s\n", userKey)
-		log.Printf("User room: %s\n", userRoom)
-		// Save connection only when user has a room
-		h.rooms[userRoom] = conLink
+	c := &connection{
+		ws: conn,
+		// send: make(chan []byte),
+		user: &user,
+		room: room,
 	}
+
+	userRoom, err := getString("GET", "user:"+user.key)
+	// If user has a room save his connection
+	if err == nil {
+		room := Room{userRoom, user}
+		log.Printf("User key: %s\n", user.key)
+		log.Printf("User room: %v\n", room)
+		// Save connection only when user has a room
+		h.rooms[room.name] = c
+	}
+
+	c.manage()
+}
+
+func (c *connection) manage() {
+	// ticker := time.NewTicker(pingPeriod)
 
 	defer func() {
 		log.Printf("Socket connection closed\n")
-		// Remove room and connection if host left
-		if len(userRoom) > 0 {
-			delete(h.rooms, userRoom)
-			exec("DEL", "user:"+userKey, "room:"+userRoom)
+		// Remove room and connection when host left
+		if c.room != nil {
+			delete(h.rooms, c.room.name)
+			exec("DEL", "user:"+c.user.key, "room:"+c.room.name)
 			log.Printf("Room removed")
 		}
-		conn.Close()
+		// ticker.Stop()
+		c.ws.Close()
 	}()
 
 	for {
-		t, msg, err := conn.ReadMessage()
+		// select {
+		// case <-ticker.C:
+		// 	c.ws.WriteMessage(websocket.PingMessage, []byte("ping:empty"))
+		// 	break
+		// default:
+		// Echo received message
+		t, msg, err := c.ws.ReadMessage()
 		if err != nil {
 			break
 		}
 		log.Printf("Socket message type: %d", t)
 
-		conn.WriteMessage(t, msg)
+		c.ws.WriteMessage(t, msg)
+		// }
 	}
+
 }
 
 func notifyHost(host string, msg string) {
 	log.Printf("Notify host\n")
 
-	conn, ok := h.rooms[host]
+	c, ok := h.rooms[host]
 	if !ok {
 		log.Printf("No connection for host\n")
 		return
 	}
 
-	conn.ws.WriteMessage(websocket.TextMessage, []byte(msg))
+	c.ws.WriteMessage(websocket.TextMessage, []byte(msg))
 }
