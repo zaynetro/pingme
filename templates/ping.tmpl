@@ -17,8 +17,15 @@
             <h1>Ping {{.Room}}</h1>
 
             {{if .IsHost}}
-            <h2>Log:</h2>
-            <textarea id="log" readonly></textarea>
+            <section>
+                <h2>Log:</h2>
+                <textarea id="log" readonly></textarea>
+            </section>
+            <section class="share">
+                <h2>Share:</h2>
+                <input type="text" class="text" id="referer" placeholder="Referer" />
+                <input type="text" onclick="this.select();" class="text" id="shareLink" readonly />
+            </section>
             {{else}}
             <h2>{{.Room}} is notified!</h2>
             {{end}}
@@ -75,9 +82,14 @@
         }
 
         function action(e) {
+            var msg;
             switch(e.name) {
                 case 'notify':
-                    notify('Someone needs you');
+                    msg = 'Someone needs you'
+                    if(e.content) {
+                        msg += ' on ' + window.decodeURIComponent(e.content);
+                    }
+                    notify(msg);
                     break;
             }
         }
@@ -114,7 +126,28 @@
             c.send("ping:fromclient");
         }, 20000);
 
+        var refererEl = document.querySelector('#referer');
+        var shareLinkEl = document.querySelector('#shareLink');
+
+        refererEl.addEventListener('keyup', formShareLink, false);
+
+        var pageUrl = (
+            window.location.protocol + 
+            '//' +
+            window.location.host +
+            window.location.pathname
+        );
+
+        function formShareLink() {
+            var from = "";
+            if(refererEl.value.length) {
+                from = "?from=" + window.encodeURIComponent(refererEl.value);
+            }
+            shareLinkEl.value = pageUrl + from;
+        }
+
         confNotifications();
+        formShareLink();
     })(window, document, undefined);
     </script>
     {{end}}

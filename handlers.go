@@ -82,8 +82,12 @@ func pingUserGET(c *gin.Context) {
 	log.Printf("Room %s, host %s, user %s\n", room, roomUser, userKey)
 
 	page := PingUserPage{room, false}
+
+	c.Request.ParseForm()
+	referer := c.Request.Form.Get("from")
+
 	if roomUser != userKey {
-		notifyHost(room, "notify:empty")
+		notifyHost(room, "notify:"+referer)
 	} else {
 		page.IsHost = true
 	}

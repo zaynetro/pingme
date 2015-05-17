@@ -10,7 +10,7 @@ Connection is held within a single tab. Everytime you close it, your room is rem
 
 * Implement queue, so you receive only a summary of all requests (no need to send dozens of notifications)
 * Review backend
-* Add referer to url, so you can see where users came from
+* <s>Add referer to url, so you can see where users came from</s>
 * Play with Service Workers
 * Clean up (when app is closed remove old entries from the database)
 
