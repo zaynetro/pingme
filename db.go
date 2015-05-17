@@ -14,7 +14,7 @@ func dial(network string, address string) (redis.Conn, error) {
 }
 
 func dialLocal() redis.Conn {
-	c, err := dial("tcp", ":6379")
+	c, err := dial("tcp", REDIS_URL)
 	if err != nil {
 		panic(err)
 	}
