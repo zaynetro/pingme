@@ -88,8 +88,8 @@ main textarea {
 	text-align: left;
 }
 
-main .share input:nth-of-type(1) { width: 30%; }
-main .share input:nth-of-type(2) { 
+main .link input:nth-of-type(1) { width: 30%; }
+main .link input:nth-of-type(2) { 
 	padding: 0.4rem 0.3rem 0.3rem;
 	font-size: 0.8rem;
 	width: 60%; 
